@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: fb-leads-agent
+    runtime: docker
+    envVars:
+      - key: FB_EMAIL
+        sync: false
+      - key: FB_PASSWORD
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: INTERVAL_MINUTES
+        sync: false
+      - key: TIMEZONE
+        value: "Asia/Jerusalem"
+      - key: QUIET_HOURS
+        value: "02:00-07:00"
+      - key: LOG_LEVEL
+        value: "DEBUG"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PANEL_TOKEN
+        sync: false
+      - key: PRE_FILTER_KEYWORDS
+        sync: false
+      - key: CLASSIFICATION_CRITERIA
+        sync: false
+    disk:
+      name: fb-leads-data
+      mountPath: /app/data
+      sizeGB: 1
