@@ -240,6 +240,33 @@ def send_error_alert(error: str) -> bool:
     )
 
 
+def send_tender(name: str, publisher: str, deadline: str, url: str,
+                category: str = "", source: str = "mr.gov.il"):
+    """שולח הודעת מכרז חדש לטלגרם."""
+    if not _get_bot_token() or not _get_chat_id():
+        log.error("חסרים משתני סביבה של טלגרם (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID)")
+        return False
+
+    deadline_line = f"\n\u23f0 *מועד אחרון:* {deadline}" if deadline else ""
+    publisher_line = f"\n\U0001f3e2 *גוף מפרסם:* {publisher}" if publisher else ""
+    category_line = f"\n\U0001f4c2 *תחום:* {category}" if category else ""
+
+    text = (
+        f"\U0001f4cb *מכרז חדש*"
+        f"{publisher_line}"
+        f"\n\n{name}"
+        f"{category_line}"
+        f"{deadline_line}"
+        f"\n\n\U0001f517 [פתח מכרז]({url})"
+        f"\n\U0001f4cd מקור: {source}"
+    )
+    return send_message(
+        text,
+        parse_mode="Markdown",
+        disable_web_page_preview=True,
+    )
+
+
 def _to_desktop_url(url: str) -> str:
     """ממיר URL מובייל ל-URL דסקטופ (m.facebook.com → www.facebook.com)."""
     return url.replace("://m.facebook.com", "://www.facebook.com")

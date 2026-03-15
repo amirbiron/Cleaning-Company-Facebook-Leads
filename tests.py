@@ -4119,3 +4119,226 @@ class TestSendLeadAuthorUrl:
                   "סיבה", author_url="")
         payload = mock_post.call_args.kwargs.get("json", {})
         assert "פרופיל המפרסם" not in payload["text"]
+
+
+# ──────────────────────────────────────────────────────────────
+# מכרזים — scraper_tenders
+# ──────────────────────────────────────────────────────────────
+
+class TestTenderIdExtraction:
+    """בדיקות ל-_tender_id — חילוץ מזהה ייחודי למכרז."""
+
+    def test_id_from_ckan_id(self):
+        from scraper_tenders import _tender_id
+        assert _tender_id({"_id": 12345}) == "tender_12345"
+
+    def test_id_from_publication_number(self):
+        from scraper_tenders import _tender_id
+        record = {"_id": "", "מספר פרסום": "4000600977"}
+        assert _tender_id(record) == "tender_4000600977"
+
+    def test_id_fallback_hash(self):
+        from scraper_tenders import _tender_id
+        record = {"שם המכרז": "מכרז ניקיון", "גורם מפרסם": "משרד הבריאות"}
+        tid = _tender_id(record)
+        assert tid.startswith("tender_hash_")
+        assert len(tid) > len("tender_hash_")
+
+    def test_same_content_same_hash(self):
+        from scraper_tenders import _tender_id
+        r1 = {"שם המכרז": "ניקיון", "גורם מפרסם": "בריאות"}
+        r2 = {"שם המכרז": "ניקיון", "גורם מפרסם": "בריאות"}
+        assert _tender_id(r1) == _tender_id(r2)
+
+
+class TestTenderIsActive:
+    """בדיקות ל-_is_active — סינון מכרזים שפג תוקפם."""
+
+    def test_future_deadline_is_active(self):
+        from scraper_tenders import _is_active
+        assert _is_active({"תאריך אחרון להגשה": "2099-12-31"}) is True
+
+    def test_past_deadline_is_inactive(self):
+        from scraper_tenders import _is_active
+        assert _is_active({"תאריך אחרון להגשה": "2020-01-01"}) is False
+
+    def test_no_deadline_is_active(self):
+        from scraper_tenders import _is_active
+        assert _is_active({}) is True
+
+    def test_various_date_formats(self):
+        from scraper_tenders import _is_active
+        assert _is_active({"תאריך אחרון להגשה": "31/12/2099"}) is True
+        assert _is_active({"תאריך אחרון להגשה": "01/01/2020"}) is False
+        assert _is_active({"מועד אחרון להגשה": "2099-12-31 12:00:00"}) is True
+
+
+class TestTenderFormatting:
+    """בדיקות ל-_format_tender — המרת רשומת CKAN למבנה ליד."""
+
+    def test_basic_formatting(self):
+        from scraper_tenders import _format_tender
+        record = {
+            "_id": 99,
+            "שם המכרז": "מכרז ניקיון",
+            "גורם מפרסם": "משרד הבריאות",
+            "תאריך אחרון להגשה": "2099-06-15",
+            "תחום": "שירותי ניקיון",
+            "מספר פרסום": "4000600977",
+        }
+        result = _format_tender(record)
+        assert result["name"] == "מכרז ניקיון"
+        assert result["publisher"] == "משרד הבריאות"
+        assert "15/06/2099" in result["deadline"]
+        assert result["category"] == "שירותי ניקיון"
+        assert "4000600977" in result["url"]
+        assert result["source"] == "mr.gov.il"
+
+    def test_missing_fields(self):
+        from scraper_tenders import _format_tender
+        result = _format_tender({"_id": 1})
+        assert result["name"] == "מכרז ללא שם"
+        assert result["publisher"] == ""
+
+    def test_mr_gov_url(self):
+        from scraper_tenders import _build_mr_gov_url
+        assert "4000600977" in _build_mr_gov_url({"מספר פרסום": "4000600977"})
+        assert "TENDER" in _build_mr_gov_url({})
+
+
+class TestFetchTenders:
+    """בדיקות ל-fetch_tenders — חיפוש ו-dedup."""
+
+    @patch("scraper_tenders._search_tenders")
+    @patch("scraper_tenders._get_resource_id", return_value="test-resource")
+    def test_dedup_across_keywords(self, mock_rid, mock_search):
+        """מכרז שמופיע בשתי מילות חיפוש לא נשלח פעמיים."""
+        from scraper_tenders import fetch_tenders
+        record = {"_id": 1, "שם המכרז": "ניקיון", "גורם מפרסם": "בריאות"}
+        mock_search.return_value = [record]
+        result = fetch_tenders(["ניקיון", "תחזוקה"])
+        assert len(result) == 1
+
+    @patch("scraper_tenders._search_tenders")
+    @patch("scraper_tenders._get_resource_id", return_value="test-resource")
+    def test_empty_keywords_returns_empty(self, mock_rid, mock_search):
+        from scraper_tenders import fetch_tenders
+        result = fetch_tenders([])
+        assert result == []
+        mock_search.assert_not_called()
+
+    @patch("scraper_tenders._search_tenders")
+    @patch("scraper_tenders._get_resource_id", return_value="test-resource")
+    def test_filters_inactive(self, mock_rid, mock_search):
+        from scraper_tenders import fetch_tenders
+        active = {"_id": 1, "שם המכרז": "פעיל", "תאריך אחרון להגשה": "2099-12-31"}
+        expired = {"_id": 2, "שם המכרז": "פג", "תאריך אחרון להגשה": "2020-01-01"}
+        mock_search.return_value = [active, expired]
+        result = fetch_tenders(["ניקיון"])
+        assert len(result) == 1
+        assert result[0]["name"] == "פעיל"
+
+
+class TestTenderKeywords:
+    """בדיקות לטעינת מילות חיפוש מכרזים."""
+
+    @patch.dict("os.environ", {"TENDER_KEYWORDS": "ניקיון,אבטחה,גינון"})
+    def test_env_var_parsing(self):
+        # צריך לטעון מחדש כי הקבוע נקבע בזמן import
+        import importlib
+        import scraper_tenders
+        importlib.reload(scraper_tenders)
+        assert "ניקיון" in scraper_tenders.TENDER_KEYWORDS_DEFAULT
+        assert "אבטחה" in scraper_tenders.TENDER_KEYWORDS_DEFAULT
+        assert "גינון" in scraper_tenders.TENDER_KEYWORDS_DEFAULT
+
+    def test_load_from_db_fallback(self):
+        from scraper_tenders import load_tender_keywords
+        # ללא DB — חוזר ל-default
+        keywords = load_tender_keywords()
+        assert isinstance(keywords, list)
+        assert len(keywords) > 0
+
+
+class TestSendTender:
+    """בדיקות ל-send_tender — פורמט הודעת מכרז בטלגרם."""
+
+    @patch("notifier.requests.post")
+    @patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "tok", "TELEGRAM_CHAT_ID": "123"})
+    def test_send_tender_format(self, mock_post):
+        mock_post.return_value = MagicMock(status_code=200)
+        from notifier import send_tender
+        result = send_tender(
+            name="מכרז ניקיון 3/2025",
+            publisher="רשות המסים",
+            deadline="22/05/2025 12:00",
+            url="https://mr.gov.il/ilgstorefront/he/p/4000600977",
+            category="שירותי ניקיון",
+        )
+        assert result is True
+        payload = mock_post.call_args.kwargs.get("json", {})
+        text = payload["text"]
+        assert "מכרז חדש" in text
+        assert "מכרז ניקיון 3/2025" in text
+        assert "רשות המסים" in text
+        assert "22/05/2025" in text
+        assert "שירותי ניקיון" in text
+        assert "mr.gov.il" in text
+
+    @patch("notifier.requests.post")
+    @patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "tok", "TELEGRAM_CHAT_ID": "123"})
+    def test_send_tender_no_deadline(self, mock_post):
+        mock_post.return_value = MagicMock(status_code=200)
+        from notifier import send_tender
+        send_tender(name="מכרז", publisher="", deadline="",
+                    url="https://example.com")
+        payload = mock_post.call_args.kwargs.get("json", {})
+        assert "מועד אחרון" not in payload["text"]
+
+    @patch("notifier.requests.post")
+    @patch.dict("os.environ", {"TELEGRAM_BOT_TOKEN": "tok", "TELEGRAM_CHAT_ID": "123"})
+    def test_send_tender_no_publisher(self, mock_post):
+        mock_post.return_value = MagicMock(status_code=200)
+        from notifier import send_tender
+        send_tender(name="מכרז", publisher="", deadline="",
+                    url="https://example.com")
+        payload = mock_post.call_args.kwargs.get("json", {})
+        assert "גוף מפרסם" not in payload["text"]
+
+
+class TestTenderDB:
+    """בדיקות ל-DB של מכרזים — seen_tenders."""
+
+    def test_mark_and_check(self, tmp_path, monkeypatch):
+        """מכרז שנשמר מזוהה כנראה."""
+        import database
+        monkeypatch.setattr(database, "DB_PATH", tmp_path / "test.db")
+        # אתחול מחדש של thread-local connection
+        if hasattr(database._local, "conn"):
+            del database._local.conn
+        database.init_db()
+        assert database.is_tender_seen("tender_123") is False
+        database.mark_tender_sent("tender_123", "מכרז ניקיון", "משרד הבריאות")
+        assert database.is_tender_seen("tender_123") is True
+
+    def test_duplicate_insert(self, tmp_path, monkeypatch):
+        """INSERT כפול לא זורק שגיאה (INSERT OR IGNORE)."""
+        import database
+        monkeypatch.setattr(database, "DB_PATH", tmp_path / "test.db")
+        if hasattr(database._local, "conn"):
+            del database._local.conn
+        database.init_db()
+        database.mark_tender_sent("tender_456", "מכרז א", "גוף א")
+        database.mark_tender_sent("tender_456", "מכרז א", "גוף א")
+        assert database.is_tender_seen("tender_456") is True
+
+    def test_stats(self, tmp_path, monkeypatch):
+        import database
+        monkeypatch.setattr(database, "DB_PATH", tmp_path / "test.db")
+        if hasattr(database._local, "conn"):
+            del database._local.conn
+        database.init_db()
+        database.mark_tender_sent("t1", "א", "x")
+        database.mark_tender_sent("t2", "ב", "y")
+        stats = database.get_tender_stats()
+        assert stats["total_tenders_sent"] == 2

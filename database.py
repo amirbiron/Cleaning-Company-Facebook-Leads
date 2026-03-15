@@ -133,6 +133,15 @@ def init_db():
                 updated_at TEXT
             )
         """)
+        # טבלת מכרזים שכבר נראו — מניעת כפילויות בסריקת מכרזים
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS seen_tenders (
+                tender_id TEXT PRIMARY KEY,
+                name TEXT,
+                publisher TEXT,
+                sent_at TEXT
+            )
+        """)
         # מיגרציה — הוספת עמודת profile_url ל-DBs קיימים
         cols = [r[1] for r in conn.execute("PRAGMA table_info(blocked_users)").fetchall()]
         if "profile_url" not in cols:
@@ -684,6 +693,32 @@ def get_all_group_health() -> list[dict]:
         }
         for r in rows
     ]
+
+
+# ── Tenders ──────────────────────────────────────────────────
+
+def is_tender_seen(tender_id: str) -> bool:
+    """בודק אם מכרז כבר נראה/נשלח."""
+    row = _get_conn().execute(
+        "SELECT 1 FROM seen_tenders WHERE tender_id = ?", (tender_id,)
+    ).fetchone()
+    return row is not None
+
+
+def mark_tender_sent(tender_id: str, name: str, publisher: str):
+    """מסמן מכרז כנשלח — למניעת כפילויות."""
+    with _get_conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO seen_tenders (tender_id, name, publisher, sent_at) VALUES (?, ?, ?, ?)",
+            (tender_id, name, publisher, _now().isoformat()),
+        )
+
+
+def get_tender_stats() -> dict:
+    """מחזיר סטטיסטיקות מכרזים."""
+    conn = _get_conn()
+    total = conn.execute("SELECT COUNT(*) FROM seen_tenders").fetchone()[0]
+    return {"total_tenders_sent": total}
 
 
 # ── Cleanup ───────────────────────────────────────────────────
