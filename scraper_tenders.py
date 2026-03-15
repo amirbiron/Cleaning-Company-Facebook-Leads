@@ -136,7 +136,8 @@ def _is_active(record: dict) -> bool:
 
 def _build_mr_gov_url(record: dict) -> str:
     """בונה לינק לעמוד המכרז ב-mr.gov.il."""
-    for field in ("מספר פרסום", "publication_number", "_id"):
+    # _id של CKAN הוא מספר שורה פנימי — לא מספר פרסום תקין ב-mr.gov.il
+    for field in ("מספר פרסום", "publication_number"):
         val = record.get(field, "")
         if val:
             return f"https://mr.gov.il/ilgstorefront/he/p/{val}"

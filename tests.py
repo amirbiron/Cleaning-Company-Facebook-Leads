@@ -4205,6 +4205,14 @@ class TestTenderFormatting:
         assert "4000600977" in _build_mr_gov_url({"מספר פרסום": "4000600977"})
         assert "TENDER" in _build_mr_gov_url({})
 
+    def test_mr_gov_url_ignores_ckan_id(self):
+        """_id של CKAN הוא מספר שורה פנימי — לא מספר פרסום תקין ב-mr.gov.il."""
+        from scraper_tenders import _build_mr_gov_url
+        url = _build_mr_gov_url({"_id": 12345})
+        # צריך להחזיר fallback לחיפוש, לא לינק עם _id
+        assert "TENDER" in url
+        assert "12345" not in url
+
 
 class TestFetchTenders:
     """בדיקות ל-fetch_tenders — חיפוש ו-dedup."""
