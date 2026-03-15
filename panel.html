@@ -1,0 +1,2507 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Leads Bot — פאנל הגדרות</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       Design System — Dark Mode Dashboard
+       Based on oklch color space with indigo accent
+       ═══════════════════════════════════════════════════════ */
+
+    :root {
+      --bg:             oklch(0.13 0.015 270);
+      --bg-card:        oklch(0.17 0.015 270);
+      --bg-sidebar:     oklch(0.15 0.015 270);
+      --bg-input:       oklch(0.11 0.015 270);
+      --bg-hover:       oklch(0.20 0.015 270);
+      --text:           oklch(0.93 0.005 270);
+      --text-secondary: oklch(0.65 0.015 270);
+      --text-muted:     oklch(0.50 0.015 270);
+      --border:         oklch(0.28 0.015 270);
+      --border-focus:   oklch(0.50 0.12 275);
+      --accent:         oklch(0.637 0.237 275);
+      --accent-hover:   oklch(0.58 0.22 275);
+      --accent-soft:    oklch(0.25 0.06 275);
+      --success:        oklch(0.65 0.2 145);
+      --success-soft:   oklch(0.25 0.06 145);
+      --destructive:    oklch(0.65 0.2 25);
+      --destructive-hover: oklch(0.58 0.2 25);
+      --destructive-soft: oklch(0.25 0.06 25);
+      --secondary:      oklch(0.22 0.015 270);
+
+      --font:           'Rubik', 'Segoe UI', Arial, sans-serif;
+      --radius-sm:      6px;
+      --radius-md:      8px;
+      --radius-lg:      10px;
+      --radius-xl:      14px;
+      --transition:     150ms ease;
+      --sidebar-width:  260px;
+    }
+
+    /* ═══ Reset ═══ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 14px;
+      scroll-behavior: smooth;
+      direction: rtl;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ═══ Layout ═══ */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ═══ Sidebar ═══ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      border-inline-start: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-logo .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    .sidebar-logo h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .sidebar-logo small {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .sidebar-nav {
+      padding: 12px 8px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+      border-color: oklch(0.35 0.08 275);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      stroke: currentColor;
+    }
+
+    /* ═══ Main Content ═══ */
+    .content {
+      flex: 1;
+      padding: 32px;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .page-header {
+      margin-bottom: 8px;
+    }
+
+    .page-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ═══ Cards ═══ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      scroll-margin-top: 24px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title > svg,
+    .card-title > span > svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+      stroke: currentColor;
+    }
+
+    .card-desc {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .card-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-section .card-title {
+      margin-bottom: 4px;
+    }
+
+    /* ═══ Forms ═══ */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row .form-group { flex: 1; }
+
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper input[type="password"],
+    .password-wrapper input[type="text"] {
+      padding-left: 40px; /* מקום לכפתור בצד שמאל (RTL — העין בצד ההתחלה של dir=ltr) */
+    }
+    .toggle-password {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      z-index: 2;
+    }
+    .toggle-password:hover { color: var(--text); }
+    .toggle-password svg { width: 18px; height: 18px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="number"],
+    input[type="time"],
+    textarea,
+    select {
+      width: 100%;
+      height: 40px;
+      padding: 8px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea {
+      height: auto;
+      min-height: 200px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .hint {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* ═══ Input Group (input + button) ═══ */
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .input-group input { flex: 1; }
+
+    /* ═══ Buttons ═══ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 20px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--bg-hover); }
+
+    .btn-destructive {
+      background: var(--destructive);
+      color: white;
+    }
+    .btn-destructive:hover { background: var(--destructive-hover); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0 8px;
+      height: 32px;
+    }
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .btn-sm {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* ═══ Badge ═══ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      line-height: 1.4;
+    }
+
+    .badge-default {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge-success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .badge-muted {
+      background: var(--secondary);
+      color: var(--text-secondary);
+    }
+
+    .badge-warning {
+      background: #fef3cd;
+      color: #856404;
+    }
+
+    /* ═══ Chip List (keywords) ═══ */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 36px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text);
+      transition: all var(--transition);
+    }
+
+    .chip:hover {
+      border-color: var(--text-muted);
+    }
+
+    .chip-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+      transition: all var(--transition);
+    }
+
+    .chip-remove:hover {
+      background: var(--destructive-soft);
+      color: var(--destructive);
+    }
+
+    .chip.chip-block {
+      border-color: oklch(0.35 0.1 25);
+      background: var(--destructive-soft);
+    }
+
+    .chips-empty {
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 8px 0;
+    }
+
+    /* ═══ Group List ═══ */
+    .group-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .group-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: all var(--transition);
+    }
+
+    .group-item:hover {
+      border-color: var(--text-muted);
+    }
+
+    .group-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .group-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .group-url {
+      font-size: 12px;
+      color: var(--text-muted);
+      direction: ltr;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .group-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .group-delete:hover {
+      background: var(--destructive-soft);
+      color: var(--destructive);
+    }
+
+    .group-delete svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 40px;
+      height: 40px;
+      stroke: currentColor;
+      margin-bottom: 8px;
+      opacity: 0.4;
+    }
+
+    /* ═══ Source Badge ═══ */
+    .source-badge {
+      margin-bottom: 12px;
+    }
+
+    .alert-banner {
+      background: #fef3cd;
+      border: 1px solid #ffc107;
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #856404;
+      line-height: 1.5;
+    }
+
+    /* ═══ Toast Notifications ═══ */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 400;
+      color: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: toastIn 0.3s ease forwards;
+      max-width: 400px;
+    }
+
+    .toast-success { background: var(--success); }
+    .toast-error { background: var(--destructive); }
+    .toast-info { background: var(--accent); }
+
+    .toast.removing {
+      animation: toastOut 0.2s ease forwards;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(16px); }
+    }
+
+    /* ═══ Mobile Menu Toggle ═══ */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      width: 44px;
+      height: 44px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-toggle svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 90;
+    }
+
+    /* ═══ Loading Spinner ═══ */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ═══ Fade-in Cards ═══ */
+    .card {
+      animation: fadeIn 0.4s ease forwards;
+      opacity: 0;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.2s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.3s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══ Responsive ═══ */
+    @media (max-width: 1024px) {
+      .content { padding: 24px; }
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle { display: flex; }
+      .sidebar-overlay.active { display: block; }
+
+      .sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100vh;
+        transform: translateX(100%);
+        z-index: 150;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+
+      .content {
+        padding: 72px 16px 32px;
+        max-width: 100%;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+
+    /* ═══ Scan Status ═══ */
+
+    .scan-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-inline-start: auto;
+    }
+
+    .scan-badge-idle {
+      background: var(--secondary);
+      color: var(--text-secondary);
+    }
+
+    .scan-badge-active {
+      background: oklch(0.25 0.08 145);
+      color: var(--success);
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+
+    .scan-badge-done {
+      background: oklch(0.20 0.06 145);
+      color: var(--success);
+    }
+
+    .scan-badge-error {
+      background: var(--destructive-soft);
+      color: var(--destructive);
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .scan-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .scan-stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .scan-stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .scan-stat-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .scan-progress-section {
+      margin-bottom: 16px;
+    }
+
+    .scan-phase-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .scan-phase-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .scan-phase-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .scan-progress-bar-track {
+      width: 100%;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .scan-progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .scan-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 4px;
+    }
+
+    .scan-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid oklch(0.22 0.01 270);
+      font-size: 13px;
+    }
+
+    .scan-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .scan-detail-key {
+      color: var(--text-secondary);
+    }
+
+    .scan-detail-val {
+      color: var(--text);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .scan-groups-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .scan-group-done-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+    }
+
+    .scan-group-done-name {
+      color: var(--text);
+      max-width: 70%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .scan-group-done-count {
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .scan-times {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .scan-time-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+      .scan-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ═══ Modal / Dialog ═══ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: oklch(0 0 0 / 0.5);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      animation: modalIn 200ms ease-out;
+    }
+    @keyframes modalIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-header h3 svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+      stroke: currentColor;
+    }
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+    }
+    .modal-close:hover { color: var(--text); background: var(--bg-hover); }
+    .modal-close svg { width: 20px; height: 20px; stroke: currentColor; }
+
+    /* ═══ Group Accordion (for group-specific force_send) ═══ */
+    .group-accordion {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .group-accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: var(--bg);
+      transition: background var(--transition);
+      user-select: none;
+    }
+    .group-accordion-header:hover { background: var(--bg-hover); }
+    .group-accordion-header .accordion-arrow {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      stroke: currentColor;
+      transition: transform 200ms ease;
+      flex-shrink: 0;
+    }
+    .group-accordion-header.open .accordion-arrow {
+      transform: rotate(90deg);
+    }
+    .group-accordion-header .group-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .group-accordion-header .group-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .group-accordion-body {
+      display: none;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .group-accordion-body.open { display: block; }
+    .group-accordion-body .chips { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Login Overlay -->
+  <div id="login-overlay" style="display:none; position:fixed; inset:0; z-index:9999;
+    background:var(--bg); align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);
+      padding:32px; width:100%; max-width:400px; text-align:center;">
+      <h2 style="font-size:20px; font-weight:600; margin-bottom:8px;">פאנל הגדרות</h2>
+      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:24px;">הזן טוקן גישה (PANEL_TOKEN)</p>
+      <div class="password-wrapper" style="margin-bottom:16px;">
+        <input type="password" id="login-token" placeholder="טוקן..." dir="ltr"
+          onkeydown="if(event.key==='Enter')submitLogin()">
+        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('login-token', this)" aria-label="הצג/הסתר סיסמה">
+          <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" onclick="submitLogin()" style="width:100%;">כניסה</button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="תפריט">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 21v-4a2 2 0 0 1 2-2h4"/><path d="M3 11V3h8l4 4v4"/><path d="M15 11h6"/><path d="M11 15H3"/><path d="M11 19H3"/><path d="M11 23H3"/>
+            </svg>
+          </div>
+          <div>
+            <h1>FB Leads</h1>
+            <small>פאנל הגדרות</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <a href="#scan-status" class="nav-item active" data-section="scan-status">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          <span>סטטוס סריקה</span>
+        </a>
+
+        <a href="#account" class="nav-item" data-section="account">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>חשבון פייסבוק</span>
+        </a>
+
+        <a href="#groups" class="nav-item" data-section="groups">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>קבוצות</span>
+        </a>
+
+        <a href="#criteria" class="nav-item" data-section="criteria">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+          <span>פרומפט AI</span>
+        </a>
+
+        <a href="#keywords" class="nav-item" data-section="keywords">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>מילות מפתח</span>
+        </a>
+
+        <a href="#force-send" class="nav-item" data-section="force-send">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          <span>שלח תמיד</span>
+        </a>
+
+        <a href="#post-age" class="nav-item" data-section="post-age">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>פוסטים ישנים</span>
+        </a>
+
+        <a href="#blocked-users" class="nav-item" data-section="blocked-users">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/>
+          </svg>
+          <span>מפרסמים חסומים</span>
+        </a>
+
+        <a href="#group-health" class="nav-item" data-section="group-health">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          <span>בריאות קבוצות</span>
+        </a>
+
+        <a href="#schedule" class="nav-item" data-section="schedule">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>שעות שקטות</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <div class="page-header">
+        <h2>הגדרות</h2>
+        <p>ניהול כל הגדרות הבוט ממקום אחד</p>
+      </div>
+
+      <!-- ═══ סטטוס סריקה ═══ -->
+      <section id="scan-status" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          סטטוס סריקה
+          <span id="scan-live-badge" class="scan-badge scan-badge-idle">ממתין</span>
+        </h3>
+        <p class="card-desc">מעקב אחרי סריקות בזמן אמת — מתעדכן אוטומטית כל 3 שניות</p>
+
+        <!-- סטטיסטיקות יומיות -->
+        <div class="scan-stats-grid">
+          <div class="scan-stat-card">
+            <div class="scan-stat-value" id="stat-daily-seen">0</div>
+            <div class="scan-stat-label">נסרקו היום</div>
+          </div>
+          <div class="scan-stat-card">
+            <div class="scan-stat-value" id="stat-daily-sent">0</div>
+            <div class="scan-stat-label">לידים היום</div>
+          </div>
+          <div class="scan-stat-card">
+            <div class="scan-stat-value" id="stat-total-seen">0</div>
+            <div class="scan-stat-label">סה״כ נסרקו</div>
+          </div>
+          <div class="scan-stat-card">
+            <div class="scan-stat-value" id="stat-total-sent">0</div>
+            <div class="scan-stat-label">סה״כ לידים</div>
+          </div>
+        </div>
+
+        <!-- פרוגרס בר + שלב נוכחי -->
+        <div class="scan-progress-section">
+          <div class="scan-phase-row">
+            <span class="scan-phase-label" id="scan-phase-text">ממתין לסריקה</span>
+            <span class="scan-phase-detail" id="scan-phase-detail"></span>
+          </div>
+          <div class="scan-progress-bar-track">
+            <div class="scan-progress-bar-fill" id="scan-progress-fill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- פרטי סריקה נוכחית -->
+        <div id="scan-details" class="scan-details" style="display:none;">
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">קבוצה נוכחית</span>
+            <span class="scan-detail-val" id="scan-current-group">—</span>
+          </div>
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">התקדמות</span>
+            <span class="scan-detail-val" id="scan-group-progress">—</span>
+          </div>
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">פוסטים שנמצאו</span>
+            <span class="scan-detail-val" id="scan-posts-found">0</span>
+          </div>
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">פוסטים חדשים</span>
+            <span class="scan-detail-val" id="scan-new-posts">0</span>
+          </div>
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">לסיווג AI</span>
+            <span class="scan-detail-val" id="scan-to-classify">0</span>
+          </div>
+          <div class="scan-detail-row">
+            <span class="scan-detail-key">לידים בסבב</span>
+            <span class="scan-detail-val" id="scan-leads-sent">0</span>
+          </div>
+        </div>
+
+        <!-- קבוצות שהושלמו -->
+        <div id="scan-groups-done-section" style="display:none;">
+          <div class="card-section">
+            <h4 class="card-title" style="font-size:14px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              קבוצות שנסרקו
+            </h4>
+            <div id="scan-groups-done-list" class="scan-groups-list"></div>
+          </div>
+        </div>
+
+        <!-- זמנים -->
+        <div class="scan-times">
+          <span id="scan-time-info" class="scan-time-text"></span>
+        </div>
+      </section>
+
+      <!-- ═══ חשבון פייסבוק ═══ -->
+      <section id="account" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          חשבון פייסבוק
+        </h3>
+        <p class="card-desc">פרטי ההתחברות לחשבון הפייסבוק שיבצע את הסריקה</p>
+
+        <div class="form-group">
+          <label for="fb-email">אימייל</label>
+          <input type="email" id="fb-email" placeholder="example@email.com" dir="ltr" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="fb-password">סיסמה</label>
+          <div class="password-wrapper">
+            <input type="password" id="fb-password" placeholder="••••••••" dir="ltr" autocomplete="off">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('fb-password', this)" aria-label="הצג/הסתר סיסמה">
+              <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveAccount()">שמור</button>
+        </div>
+      </section>
+
+      <!-- ═══ קבוצות פייסבוק ═══ -->
+      <section id="groups" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          קבוצות פייסבוק
+        </h3>
+        <p class="card-desc">רשימת הקבוצות שהבוט יסרוק — הוסף כתובות של קבוצות פייסבוק</p>
+
+        <div id="groups-source" class="source-badge"></div>
+        <div id="groups-limit" style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;"></div>
+
+        <div class="input-group">
+          <input type="url" id="new-group-url" placeholder="https://facebook.com/groups/..." dir="ltr"
+                 onkeydown="if(event.key==='Enter')addGroup()">
+          <button class="btn btn-primary btn-sm" onclick="addGroup()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            הוסף
+          </button>
+        </div>
+
+        <div id="groups-list" class="group-list"></div>
+      </section>
+
+      <!-- ═══ פרומפט AI ═══ -->
+      <section id="criteria" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+          פרומפט AI
+        </h3>
+        <p class="card-desc">
+          כתוב הנחיות ל-AI — תאר מה העסק שלך עושה, אילו פוסטים נחשבים לידים רלוונטיים ואילו לא.
+          הבוט ישתמש בטקסט הזה כפרומפט לסיווג כל פוסט שנמצא בקבוצות.
+        </p>
+
+        <div id="criteria-source" class="source-badge"></div>
+        <div id="criteria-updated-banner" class="alert-banner" style="display:none">
+          ⚠️ ברירת המחדל עודכנה מאז שהתאמת את הפרומפט. לחץ <strong>אפס לברירת מחדל</strong> לקבל את הגרסה החדשה, או השאר את הפרומפט שלך.
+        </div>
+
+        <div class="form-group">
+          <textarea id="criteria-text" rows="14"
+                    placeholder="כתוב הנחיות לבוט — מה העסק שלך, אילו לידים רלוונטיים ואילו לא..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveCriteria()">שמור</button>
+          <button class="btn btn-secondary" onclick="resetCriteria()">אפס לברירת מחדל</button>
+        </div>
+      </section>
+
+      <!-- ═══ מילות מפתח ═══ -->
+      <section id="keywords" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          מילות מפתח לסינון
+        </h3>
+        <p class="card-desc">
+          רק פוסטים שמכילים לפחות מילה אחת מהרשימה יעברו לסיווג ה-AI.
+          רשימה ריקה = כל הפוסטים עוברים לסיווג.
+        </p>
+
+        <div id="keywords-source" class="source-badge"></div>
+
+        <div class="input-group">
+          <input type="text" id="new-keyword" placeholder="הוסף מילת מפתח..."
+                 onkeydown="if(event.key==='Enter')addKeyword('pre_filter')">
+          <button class="btn btn-primary btn-sm" onclick="addKeyword('pre_filter')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            הוסף
+          </button>
+        </div>
+
+        <div id="keywords-list" class="chips"></div>
+
+        <!-- מילים חוסמות -->
+        <div class="card-section">
+          <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+            מילים חוסמות
+          </h3>
+          <p class="card-desc">
+            פוסטים שמכילים מילה מרשימה זו ידולגו אוטומטית — לפני שליחה ל-AI
+          </p>
+
+          <div id="block-source" class="source-badge"></div>
+
+          <div class="input-group">
+            <input type="text" id="new-block" placeholder="הוסף מילה חסומה..."
+                   onkeydown="if(event.key==='Enter')addKeyword('block')">
+            <button class="btn btn-destructive btn-sm" onclick="addKeyword('block')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              הוסף
+            </button>
+          </div>
+
+          <div id="block-list" class="chips"></div>
+        </div>
+      </section>
+
+      <!-- ═══ שלח תמיד ═══ -->
+      <section id="force-send" class="card">
+        <h3 class="card-title" style="justify-content: space-between;">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            שלח תמיד
+          </span>
+          <button class="btn btn-ghost btn-sm" onclick="openGroupForceSendModal()" style="font-size:12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            מתקדם — לפי קבוצה
+          </button>
+        </h3>
+        <p class="card-desc">
+          פוסט שמכיל מילה מרשימה זו יישלח ישירות לטלגרם — ללא סיווג AI, ללא סינון מוקדם.
+          שימושי למילים שתמיד מצביעות על ליד רלוונטי.
+        </p>
+
+        <div class="input-group">
+          <input type="text" id="new-force-send" placeholder="הוסף מילת 'שלח תמיד'..."
+                 onkeydown="if(event.key==='Enter')addForceSend()">
+          <button class="btn btn-primary btn-sm" onclick="addForceSend()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            הוסף
+          </button>
+        </div>
+
+        <div id="force-send-list" class="chips"></div>
+
+      </section>
+
+      <!-- ═══ מודל "שלח תמיד" לפי קבוצה ═══ -->
+      <div id="group-force-send-modal" class="modal-overlay" onclick="if(event.target===this)closeGroupForceSendModal()">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              שלח תמיד — לפי קבוצה
+            </h3>
+            <button class="modal-close" onclick="closeGroupForceSendModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p style="color:var(--text-secondary); font-size:13px; margin-bottom:16px;">
+              הגדר מילות "שלח תמיד" ספציפיות לקבוצה — פוסט שמכיל מילה כזו יישלח רק אם הוא מהקבוצה המתאימה.
+            </p>
+            <div id="group-force-send-list">
+              <div style="text-align:center; color:var(--text-muted); padding:24px;">טוען קבוצות...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ פוסטים ישנים ═══ -->
+      <section id="post-age" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          פוסטים ישנים
+        </h3>
+        <p class="card-desc">
+          סינון פוסטים לפי גיל — פוסטים ישנים מהסף שנבחר לא יישלחו לטלגרם.
+          עוקף גם מילות "שלח תמיד".
+        </p>
+
+        <div class="form-group">
+          <label for="max-post-age">גיל מקסימלי (ימים)</label>
+          <select id="max-post-age" style="width: 100%; padding: 10px 12px; background: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font: inherit; font-size: 0.95rem;">
+            <option value="0">ללא הגבלה (כבוי)</option>
+            <option value="1">יום אחד</option>
+            <option value="2">יומיים</option>
+            <option value="3">3 ימים</option>
+            <option value="5">5 ימים</option>
+            <option value="7">שבוע</option>
+            <option value="14">שבועיים</option>
+            <option value="30">חודש</option>
+          </select>
+        </div>
+
+        <div class="btn-row" style="margin-top: 16px;">
+          <button class="btn btn-primary" onclick="savePostAge()">שמור</button>
+        </div>
+      </section>
+
+      <!-- ═══ מפרסמים חסומים ═══ -->
+      <section id="blocked-users" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/>
+          </svg>
+          מפרסמים חסומים
+        </h3>
+        <p class="card-desc">
+          פוסטים מאותו מפרסם נחסמים אוטומטית — הדביקו קישור לפרופיל הפייסבוק.
+        </p>
+
+        <div class="input-group">
+          <input type="url" id="new-blocked-user" placeholder="https://facebook.com/profile..." dir="ltr"
+                 onkeydown="if(event.key==='Enter')addBlockedUser()">
+          <button class="btn btn-destructive btn-sm" onclick="addBlockedUser()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            הוסף
+          </button>
+        </div>
+
+        <div id="blocked-users-list" class="chips"></div>
+      </section>
+
+      <!-- ═══ בריאות קבוצות ═══ -->
+      <section id="group-health" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          בריאות קבוצות
+        </h3>
+        <p class="card-desc">
+          התראה נשלחת לטלגרם כשקבוצה מחזירה 0 פוסטים מספר סבבים ברצף.
+        </p>
+
+        <div class="form-group">
+          <label for="inactive-threshold">סף התראה (סבבים ריקים ברצף)</label>
+          <input type="number" id="inactive-threshold" min="1" max="999" value="50"
+                 style="width: 100%; padding: 10px 12px; background: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font: inherit; font-size: 0.95rem;" dir="ltr">
+          <p class="hint">כמה סבבים ברצף של 0 פוסטים לפני שליחת התראה. ברירת מחדל: 50.</p>
+        </div>
+
+        <div class="btn-row" style="margin-top: 16px;">
+          <button class="btn btn-primary" onclick="saveGroupHealthSettings()">שמור</button>
+        </div>
+      </section>
+
+      <!-- ═══ לוח זמנים ═══ -->
+      <section id="schedule" class="card">
+        <h3 class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          שעות שקטות
+        </h3>
+        <p class="card-desc">הגדרת שעות שבהן הבוט לא יסרוק</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quiet-start">שעות שקטות — התחלה</label>
+            <input type="time" id="quiet-start" dir="ltr">
+          </div>
+          <div class="form-group">
+            <label for="quiet-end">שעות שקטות — סיום</label>
+            <input type="time" id="quiet-end" dir="ltr">
+          </div>
+        </div>
+        <p class="hint">השאר ריק כדי לבטל שעות שקטות.</p>
+
+        <div class="btn-row" style="margin-top: 16px;">
+          <button class="btn btn-primary" onclick="saveSchedule()">שמור</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       Panel JavaScript — API calls, state management, UI
+       ═══════════════════════════════════════════════════════ */
+
+    const API = '';  // same origin
+
+    // ── Auth Token ───────────────────────────────────────
+    function getToken() { return localStorage.getItem('panel_token') || ''; }
+    function setToken(t) { localStorage.setItem('panel_token', t); }
+
+    // ── Toast Notifications ──────────────────────────────
+    function toast(message, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = message;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => {
+        el.classList.add('removing');
+        setTimeout(() => el.remove(), 200);
+      }, 3000);
+    }
+
+    // ── API Helper ───────────────────────────────────────
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = getToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(API + path, {
+        headers,
+        ...opts,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      });
+      if (res.status === 401) {
+        showLogin();
+        throw new Error('אימות נדרש');
+      }
+      const data = await res.json();
+      if (!res.ok && !data.ok) {
+        throw new Error(data.message || `שגיאה ${res.status}`);
+      }
+      return data;
+    }
+
+    // ── Login Screen ─────────────────────────────────────
+    function showLogin() {
+      document.getElementById('login-overlay').style.display = 'flex';
+    }
+
+    function hideLogin() {
+      document.getElementById('login-overlay').style.display = 'none';
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.querySelector('.eye-open').style.display = isPassword ? 'none' : '';
+      btn.querySelector('.eye-closed').style.display = isPassword ? '' : 'none';
+    }
+
+    async function submitLogin() {
+      const input = document.getElementById('login-token');
+      const token = input.value.trim();
+      if (!token) return;
+      setToken(token);
+      try {
+        const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        const res = await fetch(API + '/api/auth', { method: 'POST', headers });
+        if (res.ok) {
+          hideLogin();
+          loadAll();  // fire-and-forget — שגיאת טעינה לא צריכה למחוק טוקן תקין
+        } else {
+          setToken('');
+          input.value = '';
+          toast('טוקן שגוי', 'error');
+        }
+      } catch (e) {
+        setToken('');
+        input.value = '';
+        toast('שגיאת תקשורת', 'error');
+      }
+    }
+
+    async function checkAuth() {
+      const token = getToken();
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(API + '/api/auth', { method: 'POST', headers });
+        if (!res.ok) {
+          // כל תשובה לא-תקינה (401, 429 וכו') — דורשים אימות מחדש
+          showLogin();
+          return false;
+        }
+        // אימות הצליח, או שאין צורך באימות (auth_required=false)
+        hideLogin();
+        return true;
+      } catch (e) {
+        // שגיאת רשת — ברירת מחדל: דורשים אימות
+        showLogin();
+        return false;
+      }
+    }
+
+    // ── Source Badge Helper ──────────────────────────────
+    function renderSourceBadge(containerId, source) {
+      const el = document.getElementById(containerId);
+      if (source === 'none') {
+        el.innerHTML = '<span class="badge badge-warning">לא הוגדר — יש להוסיף כדי להתחיל סריקה</span>';
+      } else if (source === 'default') {
+        el.innerHTML = '<span class="badge badge-muted">ברירת מחדל — שמור כדי להתאים אישית</span>';
+      } else {
+        el.innerHTML = '<span class="badge badge-success">מותאם אישית</span>';
+      }
+    }
+
+    // ═══ Settings (account + criteria + schedule) ════════
+
+    let currentSettings = {};
+    let criteriaDefault = '';
+
+    async function loadSettings() {
+      try {
+        currentSettings = await api('/api/settings');
+        document.getElementById('fb-email').value = currentSettings.fb_email || '';
+        const pwField = document.getElementById('fb-password');
+        pwField.value = '';
+        // placeholder מראה שיש סיסמה שמורה, אבל לא חושפים אותה
+        pwField.placeholder = currentSettings.fb_password_set ? '(סיסמה שמורה — הזן חדשה לשינוי)' : '••••••••';
+        document.getElementById('criteria-text').value = currentSettings.classification_criteria || '';
+
+        // שעות שקטות
+        const qh = currentSettings.quiet_hours || '';
+        if (qh.includes('-')) {
+          const [start, end] = qh.split('-');
+          document.getElementById('quiet-start').value = start.trim();
+          document.getElementById('quiet-end').value = end.trim();
+        }
+
+        // שמירת ברירת מחדל של קריטריונים — תמיד זמין מה-API
+        criteriaDefault = currentSettings.classification_criteria_default || '';
+
+        renderSourceBadge('criteria-source',
+          currentSettings.criteria_is_default ? 'default' : 'custom');
+
+        // באנר — ברירת מחדל עודכנה מאז שהמשתמש שמר פרומפט מותאם
+        const banner = document.getElementById('criteria-updated-banner');
+        banner.style.display = currentSettings.criteria_default_changed ? '' : 'none';
+
+        // גיל מקסימלי לפוסטים
+        const maxAge = currentSettings.max_post_age_days || 0;
+        document.getElementById('max-post-age').value = String(maxAge);
+
+        // סף התראת קבוצות לא פעילות
+        const inactiveThreshold = currentSettings.inactive_group_threshold || 50;
+        document.getElementById('inactive-threshold').value = String(inactiveThreshold);
+      } catch (e) {
+        toast('שגיאה בטעינת הגדרות: ' + e.message, 'error');
+      }
+    }
+
+    async function saveAccount() {
+      try {
+        await api('/api/settings', {
+          method: 'PUT',
+          body: {
+            fb_email: document.getElementById('fb-email').value,
+            fb_password: document.getElementById('fb-password').value,
+          },
+        });
+        toast('פרטי חשבון נשמרו');
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function saveCriteria() {
+      try {
+        await api('/api/settings', {
+          method: 'PUT',
+          body: {
+            classification_criteria: document.getElementById('criteria-text').value,
+          },
+        });
+        toast('פרומפט AI נשמר');
+        renderSourceBadge('criteria-source', 'custom');
+        document.getElementById('criteria-updated-banner').style.display = 'none';
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function resetCriteria() {
+      if (!criteriaDefault) {
+        toast('לא נמצאה ברירת מחדל', 'error');
+        return;
+      }
+      document.getElementById('criteria-text').value = criteriaDefault;
+      try {
+        await api('/api/settings', {
+          method: 'PUT',
+          body: { classification_criteria: '' },
+        });
+        toast('קריטריונים אופסו לברירת מחדל');
+        renderSourceBadge('criteria-source', 'default');
+        document.getElementById('criteria-updated-banner').style.display = 'none';
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function saveSchedule() {
+      const start = document.getElementById('quiet-start').value;
+      const end = document.getElementById('quiet-end').value;
+      let quietHours = '';
+      if (start && end) {
+        quietHours = `${start}-${end}`;
+      }
+      try {
+        await api('/api/settings', {
+          method: 'PUT',
+          body: {
+            quiet_hours: quietHours,
+          },
+        });
+        toast('לוח זמנים נשמר');
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ── בריאות קבוצות ─────────────────────────────────
+
+    async function saveGroupHealthSettings() {
+      const val = document.getElementById('inactive-threshold').value;
+      const num = parseInt(val, 10);
+      if (isNaN(num) || num < 1) {
+        toast('הסף חייב להיות מספר שלם >= 1', 'error');
+        return;
+      }
+      try {
+        await api('/api/group-health/settings', {
+          method: 'PUT',
+          body: { inactive_threshold: num },
+        });
+        toast('סף התראה נשמר');
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function savePostAge() {
+      const val = document.getElementById('max-post-age').value;
+      try {
+        await api('/api/settings', {
+          method: 'PUT',
+          body: {
+            max_post_age_days: val,
+          },
+        });
+        toast(val === '0' ? 'סינון גיל בוטל' : `סינון גיל הוגדר: ${val} ימים`);
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Groups ══════════════════════════════════════════
+
+    function renderGroups(groups) {
+      const list = document.getElementById('groups-list');
+      if (!groups || groups.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+            <p>אין קבוצות — הוסף קבוצת פייסבוק לסריקה</p>
+          </div>`;
+        return;
+      }
+      list.innerHTML = '';
+      groups.forEach(g => {
+        const item = document.createElement('div');
+        item.className = 'group-item';
+        const info = document.createElement('div');
+        info.className = 'group-info';
+        const isPending = /^\d+$/.test(g.name);
+        const displayName = isPending
+          ? `${escapeHtml(g.name)} <span style="opacity:.55;font-size:.85em">(יעודכן בסריקה הבאה)</span>`
+          : escapeHtml(g.name);
+        info.innerHTML = `<div class="group-name">${displayName}</div>
+          <div class="group-url">${escapeHtml(g.url)}</div>`;
+        const btn = document.createElement('button');
+        btn.className = 'group-delete';
+        btn.title = 'הסר קבוצה';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+        btn.addEventListener('click', () => removeGroup(g.url));
+        item.appendChild(info);
+        item.appendChild(btn);
+        list.appendChild(item);
+      });
+    }
+
+    async function loadGroups() {
+      try {
+        const data = await api('/api/groups');
+        renderGroups(data.groups);
+        renderSourceBadge('groups-source', data.source);
+        // הצגת מגבלת קבוצות
+        const limitEl = document.getElementById('groups-limit');
+        const addBtn = document.querySelector('#groups .btn-primary');
+        if (data.max_groups > 0) {
+          limitEl.textContent = `${data.count} / ${data.max_groups} קבוצות`;
+          if (data.count >= data.max_groups) {
+            limitEl.style.color = 'var(--destructive, #e74c3c)';
+            if (addBtn) addBtn.disabled = true;
+          } else {
+            limitEl.style.color = 'var(--text-secondary)';
+            if (addBtn) addBtn.disabled = false;
+          }
+        } else {
+          limitEl.textContent = '';
+          if (addBtn) addBtn.disabled = false;
+        }
+      } catch (e) {
+        toast('שגיאה בטעינת קבוצות: ' + e.message, 'error');
+      }
+    }
+
+    async function addGroup() {
+      const input = document.getElementById('new-group-url');
+      const url = input.value.trim();
+      if (!url) return;
+      try {
+        const data = await api('/api/groups', {
+          method: 'POST',
+          body: { url },
+        });
+        if (data.ok) {
+          toast(data.message);
+          input.value = '';
+          await loadGroups();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function removeGroup(url) {
+      try {
+        const data = await api('/api/groups', {
+          method: 'DELETE',
+          body: { url },
+        });
+        if (data.ok) {
+          toast(data.message);
+          await loadGroups();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Keywords ════════════════════════════════════════
+
+    function renderChips(containerId, words, type) {
+      const el = document.getElementById(containerId);
+      if (!words || words.length === 0) {
+        el.innerHTML = '<span class="chips-empty">אין מילים ברשימה</span>';
+        return;
+      }
+      const chipClass = (type === 'block' || type === 'blocked_user') ? 'chip chip-block' : 'chip';
+      el.innerHTML = '';
+      words.forEach(w => {
+        const span = document.createElement('span');
+        span.className = chipClass;
+        span.appendChild(document.createTextNode(w + ' '));
+        const btn = document.createElement('button');
+        btn.className = 'chip-remove';
+        btn.title = 'הסר';
+        btn.innerHTML = '&times;';
+        btn.addEventListener('click', () => {
+          if (type === 'force_send') removeForceSend(w);
+          else if (type === 'blocked_user') removeBlockedUser(w);
+          else removeKeyword(w, type);
+        });
+        span.appendChild(btn);
+        el.appendChild(span);
+      });
+    }
+
+    async function loadKeywords(type) {
+      try {
+        const data = await api(`/api/keywords/${type}`);
+        const containerId = type === 'block' ? 'block-list' : 'keywords-list';
+        const sourceId = type === 'block' ? 'block-source' : 'keywords-source';
+        renderChips(containerId, data.keywords, type);
+        renderSourceBadge(sourceId, data.source);
+      } catch (e) {
+        toast('שגיאה בטעינת מילות מפתח: ' + e.message, 'error');
+      }
+    }
+
+    async function addKeyword(type) {
+      const inputId = type === 'block' ? 'new-block' : 'new-keyword';
+      const input = document.getElementById(inputId);
+      const word = input.value.trim();
+      if (!word) return;
+      try {
+        const data = await api(`/api/keywords/${type}`, {
+          method: 'POST',
+          body: { word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          input.value = '';
+          await loadKeywords(type);
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function removeKeyword(word, type) {
+      try {
+        const data = await api(`/api/keywords/${type}`, {
+          method: 'DELETE',
+          body: { word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          await loadKeywords(type);
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Force Send ═══════════════════════════════════════
+
+    async function loadForceSend() {
+      try {
+        const data = await api('/api/force_send');
+        renderChips('force-send-list', data.keywords, 'force_send');
+      } catch (e) {
+        toast('שגיאה בטעינת מילות שלח תמיד: ' + e.message, 'error');
+      }
+    }
+
+    async function addForceSend() {
+      const input = document.getElementById('new-force-send');
+      const word = input.value.trim();
+      if (!word) return;
+      try {
+        const data = await api('/api/force_send', {
+          method: 'POST',
+          body: { word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          input.value = '';
+          await loadForceSend();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function removeForceSend(word) {
+      try {
+        const data = await api('/api/force_send', {
+          method: 'DELETE',
+          body: { word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          await loadForceSend();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Blocked Users ══════════════════════════════════
+
+    async function loadBlockedUsers() {
+      try {
+        const data = await api('/api/blocked_users');
+        renderBlockedUsers(data.users);
+      } catch (e) {
+        toast('שגיאה בטעינת מפרסמים חסומים: ' + e.message, 'error');
+      }
+    }
+
+    function renderBlockedUsers(users) {
+      const container = document.getElementById('blocked-users-list');
+      container.innerHTML = '';
+      if (!users || users.length === 0) return;
+      users.forEach(u => {
+        const chip = document.createElement('span');
+        chip.className = 'chip chip-block';
+        chip.appendChild(document.createTextNode(u.name + ' '));
+        const btn = document.createElement('button');
+        btn.className = 'chip-remove';
+        btn.textContent = '×';
+        btn.onclick = () => removeBlockedUser(u.profile_url);
+        chip.appendChild(btn);
+        container.appendChild(chip);
+      });
+    }
+
+    async function addBlockedUser() {
+      const input = document.getElementById('new-blocked-user');
+      const url = input.value.trim();
+      if (!url) return;
+      try {
+        const data = await api('/api/blocked_users', {
+          method: 'POST',
+          body: { url },
+        });
+        if (data.ok) {
+          toast(data.message);
+          input.value = '';
+          await loadBlockedUsers();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function removeBlockedUser(profileUrl) {
+      try {
+        const data = await api('/api/blocked_users', {
+          method: 'DELETE',
+          body: { url: profileUrl },
+        });
+        if (data.ok) {
+          toast(data.message);
+          await loadBlockedUsers();
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Group-Specific Force Send (Advanced Modal) ═══════
+
+    function openGroupForceSendModal() {
+      document.getElementById('group-force-send-modal').classList.add('active');
+      loadGroupForceSendModal();
+    }
+
+    function closeGroupForceSendModal() {
+      document.getElementById('group-force-send-modal').classList.remove('active');
+    }
+
+    async function loadGroupForceSendModal() {
+      const container = document.getElementById('group-force-send-list');
+      container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:24px;">טוען קבוצות...</div>';
+      try {
+        // טוען קבוצות ומילות force_send לכל קבוצה במקביל
+        const [groupsData, gfsData] = await Promise.all([
+          api('/api/groups'),
+          api('/api/group_force_send'),
+        ]);
+        const groups = groupsData.groups || [];
+        const groupKeywords = gfsData.groups || {}; // {url: [kw, ...]}
+
+        if (groups.length === 0) {
+          container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:24px;">אין קבוצות מוגדרות</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        groups.forEach(group => {
+          // נרמול URL — מסיר slash בסוף כדי להתאים למפתחות ב-groupKeywords
+          const normalizedUrl = group.url.replace(/\/+$/, '');
+          const kws = groupKeywords[normalizedUrl] || groupKeywords[group.url] || [];
+          const acc = buildGroupAccordion(group, kws);
+          container.appendChild(acc);
+        });
+      } catch (e) {
+        container.innerHTML = `<div style="text-align:center; color:var(--destructive); padding:24px;">שגיאה: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function buildGroupAccordion(group, keywords) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'group-accordion';
+
+      // header
+      const header = document.createElement('div');
+      header.className = 'group-accordion-header';
+      header.innerHTML = `
+        <svg class="accordion-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+        <span class="group-name">${escapeHtml(group.name)}</span>
+        ${keywords.length > 0 ? `<span class="group-badge">${keywords.length}</span>` : ''}
+      `;
+      header.addEventListener('click', () => {
+        header.classList.toggle('open');
+        body.classList.toggle('open');
+      });
+
+      // body
+      const body = document.createElement('div');
+      body.className = 'group-accordion-body';
+
+      // input + button
+      const inputGroup = document.createElement('div');
+      inputGroup.className = 'input-group';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'הוסף מילת "שלח תמיד" לקבוצה...';
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') addGroupForceSend(group.url, input, wrapper, group);
+      });
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn btn-primary btn-sm';
+      addBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוסף`;
+      addBtn.addEventListener('click', () => addGroupForceSend(group.url, input, wrapper, group));
+      inputGroup.appendChild(input);
+      inputGroup.appendChild(addBtn);
+      body.appendChild(inputGroup);
+
+      // chips
+      const chipsDiv = document.createElement('div');
+      chipsDiv.className = 'chips';
+      renderGroupForceSendChips(chipsDiv, keywords, group.url, wrapper, group);
+      body.appendChild(chipsDiv);
+
+      wrapper.appendChild(header);
+      wrapper.appendChild(body);
+      return wrapper;
+    }
+
+    function renderGroupForceSendChips(container, keywords, groupUrl, accordionWrapper, group) {
+      container.innerHTML = '';
+      if (!keywords || keywords.length === 0) {
+        container.innerHTML = '<span class="chips-empty">אין מילים ספציפיות לקבוצה</span>';
+        return;
+      }
+      keywords.forEach(w => {
+        const span = document.createElement('span');
+        span.className = 'chip';
+        span.appendChild(document.createTextNode(w + ' '));
+        const btn = document.createElement('button');
+        btn.className = 'chip-remove';
+        btn.title = 'הסר';
+        btn.innerHTML = '&times;';
+        btn.addEventListener('click', () => removeGroupForceSend(groupUrl, w, container, accordionWrapper, group));
+        span.appendChild(btn);
+        container.appendChild(span);
+      });
+    }
+
+    async function addGroupForceSend(groupUrl, inputEl, accordionWrapper, group) {
+      const word = inputEl.value.trim();
+      if (!word) return;
+      try {
+        const data = await api('/api/group_force_send/keywords', {
+          method: 'POST',
+          body: { url: groupUrl, word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          inputEl.value = '';
+          // רענון — טוען מחדש את המילים של הקבוצה
+          await refreshGroupAccordion(groupUrl, accordionWrapper, group);
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function removeGroupForceSend(groupUrl, word, chipsContainer, accordionWrapper, group) {
+      try {
+        const data = await api('/api/group_force_send/keywords', {
+          method: 'DELETE',
+          body: { url: groupUrl, word },
+        });
+        if (data.ok) {
+          toast(data.message);
+          await refreshGroupAccordion(groupUrl, accordionWrapper, group);
+        } else {
+          toast(data.message, 'error');
+        }
+      } catch (e) {
+        toast('שגיאה: ' + e.message, 'error');
+      }
+    }
+
+    async function refreshGroupAccordion(groupUrl, accordionWrapper, group) {
+      try {
+        const data = await api(`/api/group_force_send/keywords?url=${encodeURIComponent(groupUrl)}`);
+        const keywords = data.keywords || [];
+        // שומר על מצב פתוח/סגור
+        const wasOpen = accordionWrapper.querySelector('.group-accordion-body')?.classList.contains('open');
+        const newAcc = buildGroupAccordion(group, keywords);
+        if (wasOpen) {
+          newAcc.querySelector('.group-accordion-header').classList.add('open');
+          newAcc.querySelector('.group-accordion-body').classList.add('open');
+        }
+        accordionWrapper.replaceWith(newAcc);
+      } catch (e) {
+        toast('שגיאה ברענון: ' + e.message, 'error');
+      }
+    }
+
+    // ═══ Scan Status (Live Polling) ═══════════════════════
+
+    let _scanPollTimer = null;
+
+    function startScanPolling() {
+      // ניקוי טיימר קודם — מונע הצטברות intervals ב-re-auth
+      stopScanPolling();
+      // polling כל 3 שניות — קל מספיק גם ל-512MB VM
+      loadScanStatus();
+      _scanPollTimer = setInterval(loadScanStatus, 3000);
+    }
+
+    function stopScanPolling() {
+      if (_scanPollTimer) {
+        clearInterval(_scanPollTimer);
+        _scanPollTimer = null;
+      }
+    }
+
+    async function loadScanStatus() {
+      try {
+        const d = await api('/api/scan-status');
+        renderScanStatus(d);
+      } catch (e) {
+        // אם הפאנל לא מחובר / טוקן פג — לא מציגים שגיאה כל 3 שניות
+      }
+    }
+
+    function renderScanStatus(d) {
+      // באדג' — פעיל / ממתין / הסתיים / שגיאה
+      const badge = document.getElementById('scan-live-badge');
+      if (d.active) {
+        badge.textContent = 'פעיל';
+        badge.className = 'scan-badge scan-badge-active';
+      } else if (d.phase === 'done') {
+        badge.textContent = 'הסתיים';
+        badge.className = 'scan-badge scan-badge-done';
+      } else if (d.phase === 'error') {
+        badge.textContent = 'שגיאה';
+        badge.className = 'scan-badge scan-badge-error';
+      } else {
+        badge.textContent = 'ממתין';
+        badge.className = 'scan-badge scan-badge-idle';
+      }
+
+      // סטטיסטיקות
+      document.getElementById('stat-daily-seen').textContent = d.daily_seen ?? 0;
+      document.getElementById('stat-daily-sent').textContent = d.daily_sent ?? 0;
+      document.getElementById('stat-total-seen').textContent = d.total_seen ?? 0;
+      document.getElementById('stat-total-sent').textContent = d.total_sent ?? 0;
+
+      // שלב + פרוגרס בר
+      const phaseText = document.getElementById('scan-phase-text');
+      const phaseDetail = document.getElementById('scan-phase-detail');
+      const fill = document.getElementById('scan-progress-fill');
+
+      if (d.active) {
+        phaseText.textContent = d.phase_label || 'סורק...';
+        let pct = 0;
+        if (d.phase === 'scraping' && d.total_groups > 0) {
+          // חישוב אחוז לפי קבוצות שהושלמו
+          pct = Math.round(((d.groups_done?.length || 0) / d.total_groups) * 60);
+          phaseDetail.textContent = `קבוצה ${d.current_group_index || 0}/${d.total_groups}`;
+        } else if (d.phase === 'filtering') {
+          pct = 70;
+          phaseDetail.textContent = `${d.new_posts || 0} פוסטים חדשים`;
+        } else if (d.phase === 'classifying') {
+          pct = 85;
+          phaseDetail.textContent = `${d.posts_to_classify || 0} פוסטים`;
+        }
+        fill.style.width = pct + '%';
+      } else if (d.phase === 'done') {
+        phaseText.textContent = 'סריקה הסתיימה';
+        phaseDetail.textContent = d.leads_sent ? `${d.leads_sent} לידים` : 'ללא לידים חדשים';
+        fill.style.width = '100%';
+      } else if (d.phase === 'error') {
+        phaseText.textContent = 'שגיאה בסריקה';
+        phaseDetail.textContent = d.error ? d.error.substring(0, 60) : '';
+        fill.style.width = '0%';
+      } else {
+        phaseText.textContent = 'ממתין לסריקה הבאה';
+        phaseDetail.textContent = d.server_time ? `שעת שרת: ${d.server_time}` : '';
+        fill.style.width = '0%';
+      }
+
+      // פרטי סריקה — מוצגים רק בזמן סריקה או אחריה
+      const details = document.getElementById('scan-details');
+      if (d.active || d.phase === 'done' || d.phase === 'error') {
+        details.style.display = '';
+        document.getElementById('scan-current-group').textContent = d.current_group || '—';
+        document.getElementById('scan-group-progress').textContent =
+          d.total_groups ? `${d.groups_done?.length || 0} / ${d.total_groups}` : '—';
+        document.getElementById('scan-posts-found').textContent = d.total_posts_found ?? 0;
+        document.getElementById('scan-new-posts').textContent = d.new_posts ?? 0;
+        document.getElementById('scan-to-classify').textContent = d.posts_to_classify ?? 0;
+        document.getElementById('scan-leads-sent').textContent = d.leads_sent ?? 0;
+      } else {
+        details.style.display = 'none';
+      }
+
+      // קבוצות שהושלמו
+      const groupsSection = document.getElementById('scan-groups-done-section');
+      const groupsList = document.getElementById('scan-groups-done-list');
+      if (d.groups_done && d.groups_done.length > 0) {
+        groupsSection.style.display = '';
+        groupsList.innerHTML = '';
+        d.groups_done.forEach(g => {
+          const div = document.createElement('div');
+          div.className = 'scan-group-done-item';
+          div.innerHTML = `<span class="scan-group-done-name">${escapeHtml(g.name)}</span>
+            <span class="scan-group-done-count">${g.posts_found} פוסטים</span>`;
+          groupsList.appendChild(div);
+        });
+      } else {
+        groupsSection.style.display = 'none';
+      }
+
+      // זמנים
+      const timeInfo = document.getElementById('scan-time-info');
+      const parts = [];
+      if (d.started_at) {
+        const s = new Date(d.started_at);
+        parts.push('התחלה: ' + s.toLocaleTimeString('he-IL'));
+      }
+      if (d.finished_at) {
+        const f = new Date(d.finished_at);
+        parts.push('סיום: ' + f.toLocaleTimeString('he-IL'));
+        if (d.started_at) {
+          const dur = Math.round((new Date(d.finished_at) - new Date(d.started_at)) / 1000);
+          const mins = Math.floor(dur / 60);
+          const secs = dur % 60;
+          parts.push(`משך: ${mins > 0 ? mins + ' דק\' ' : ''}${secs} שנ\'`);
+        }
+      }
+      timeInfo.textContent = parts.join('  |  ');
+    }
+
+    // ═══ Sidebar Navigation ═════════════════════════════
+
+    function initNavigation() {
+      const navItems = document.querySelectorAll('.nav-item[data-section]');
+      const sections = document.querySelectorAll('.card[id]');
+
+      // Intersection Observer — מדגיש את הסקשן הנוכחי בסיידבר
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navItems.forEach(item => item.classList.remove('active'));
+            const active = document.querySelector(`.nav-item[data-section="${entry.target.id}"]`);
+            if (active) active.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+
+      sections.forEach(s => observer.observe(s));
+
+      // סגירת סיידבר בלחיצה על פריט (מובייל)
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            toggleSidebar();
+          }
+        });
+      });
+    }
+
+    // ═══ Mobile Sidebar Toggle ══════════════════════════
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('active');
+    }
+
+    // ═══ Utils ═══════════════════════════════════════════
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+
+    // ═══ Init ════════════════════════════════════════════
+
+    async function loadAll() {
+      await Promise.all([
+        loadSettings(),
+        loadGroups(),
+        loadKeywords('pre_filter'),
+        loadKeywords('block'),
+        loadForceSend(),
+        loadBlockedUsers(),
+      ]);
+      // startScanPolling כבר קורא ל-loadScanStatus כפעולה ראשונה
+      startScanPolling();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initNavigation();
+      const authed = await checkAuth();
+      if (authed) await loadAll();
+    });
+  </script>
+</body>
+</html>
