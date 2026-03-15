@@ -1978,8 +1978,9 @@ async def _run_debug_scan(group_url: str) -> str:
 
 
 async def _run_tender_scan() -> int:
-    """סורק מכרזים ממשלתיים ושולח חדשים לטלגרם. מחזיר מספר מכרזים שנשלחו."""
+    """סורק מכרזים ממשלתיים, מסנן עם AI, ושולח חדשים לטלגרם. מחזיר מספר מכרזים שנשלחו."""
     from scraper_tenders import TENDER_ENABLED, fetch_tenders, load_tender_keywords
+    from classifier import classify_tender_batch
     from database import is_tender_seen, mark_tender_sent
     from notifier import send_tender
 
@@ -1995,27 +1996,43 @@ async def _run_tender_scan() -> int:
     keywords = load_tender_keywords()
     tenders = await asyncio.to_thread(fetch_tenders, keywords)
 
+    # סינון מכרזים שכבר נשלחו
+    new_tenders = [t for t in tenders if not is_tender_seen(t["id"])]
+    log.info(f"מכרזים חדשים לסיווג: {len(new_tenders)} (מתוך {len(tenders)} פעילים)")
+
+    if not new_tenders:
+        return 0
+
+    # סיווג AI — מסנן מכרזים לא רלוונטיים (מכרז שמזכיר "ניקיון" אבל לא באמת שירותי ניקיון)
+    results = await asyncio.to_thread(classify_tender_batch, new_tenders)
+
     sent = 0
-    for t in tenders:
-        if is_tender_seen(t["id"]):
+    skipped = 0
+    for tender, result in zip(new_tenders, results):
+        if not result.get("relevant"):
+            skipped += 1
+            log.debug(f"מכרז לא רלוונטי: {tender['name'][:50]} — {result.get('reason', '')}")
+            # מסמנים כנראה כדי לא לסווג שוב
+            mark_tender_sent(tender["id"], tender["name"], tender["publisher"])
             continue
+        reason = result.get("reason", "")
         ok = await asyncio.to_thread(
             send_tender,
-            name=t["name"],
-            publisher=t["publisher"],
-            deadline=t["deadline"],
-            url=t["url"],
-            category=t.get("category", ""),
-            source=t.get("source", "mr.gov.il"),
+            name=tender["name"],
+            publisher=tender["publisher"],
+            deadline=tender["deadline"],
+            url=tender["url"],
+            category=tender.get("category", ""),
+            source=tender.get("source", "mr.gov.il"),
         )
         if ok:
-            mark_tender_sent(t["id"], t["name"], t["publisher"])
+            mark_tender_sent(tender["id"], tender["name"], tender["publisher"])
             sent += 1
-            log.info(f"מכרז נשלח: {t['name'][:60]}")
+            log.info(f"מכרז נשלח: {tender['name'][:60]} — {reason}")
         else:
-            log.warning(f"שליחת מכרז נכשלה: {t['name'][:60]}")
+            log.warning(f"שליחת מכרז נכשלה: {tender['name'][:60]}")
 
-    log.info(f"סריקת מכרזים הסתיימה — {sent} מכרזים חדשים נשלחו (מתוך {len(tenders)} פעילים)")
+    log.info(f"סריקת מכרזים הסתיימה — {sent} נשלחו, {skipped} סוננו ע\"י AI")
     return sent
 
 

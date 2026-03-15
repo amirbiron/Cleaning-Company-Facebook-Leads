@@ -4239,6 +4239,60 @@ class TestFetchTenders:
         assert result[0]["name"] == "פעיל"
 
 
+class TestClassifyTender:
+    """בדיקות לסיווג מכרזים עם AI."""
+
+    @patch("classifier._chat_completion")
+    def test_classify_tender_relevant(self, mock_chat):
+        mock_chat.return_value = '{"relevant": true, "reason": "מכרז ניקיון למוסד ציבורי"}'
+        from classifier import classify_tender
+        result = classify_tender("שירותי ניקיון למשרד הבריאות", "משרד הבריאות", "שירותי ניקיון")
+        assert result["relevant"] is True
+
+    @patch("classifier._chat_completion")
+    def test_classify_tender_not_relevant(self, mock_chat):
+        mock_chat.return_value = '{"relevant": false, "reason": "מכרז לניקיון נתונים, לא ניקיון פיזי"}'
+        from classifier import classify_tender
+        result = classify_tender("ניקיון נתונים ממערכת IT", "משרד החינוך", "IT")
+        assert result["relevant"] is False
+
+    @patch("classifier._chat_completion")
+    def test_classify_tender_batch(self, mock_chat):
+        mock_chat.return_value = '[{"relevant": true, "reason": "ניקיון"}, {"relevant": false, "reason": "לא רלוונטי"}]'
+        from classifier import classify_tender_batch
+        tenders = [
+            {"name": "ניקיון משרדים", "publisher": "עירייה", "category": "ניקיון"},
+            {"name": "מכרז IT", "publisher": "משרד", "category": "טכנולוגיה"},
+        ]
+        results = classify_tender_batch(tenders)
+        assert len(results) == 2
+        assert results[0]["relevant"] is True
+        assert results[1]["relevant"] is False
+
+    @patch("classifier._chat_completion")
+    def test_batch_fallback_on_bad_json(self, mock_chat):
+        """JSON לא תקין בבאצ' — נופל לסיווג בודד."""
+        call_count = 0
+        def side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return "not valid json"
+            return '{"relevant": true, "reason": "ok"}'
+        mock_chat.side_effect = side_effect
+        from classifier import classify_tender_batch
+        tenders = [{"name": "ניקיון", "publisher": "א", "category": ""}]
+        results = classify_tender_batch(tenders)
+        assert len(results) == 1
+
+    def test_tender_criteria_has_default(self):
+        """קריטריוני סיווג מכרזים כוללים ברירת מחדל מובנית."""
+        from classifier import _get_tender_criteria
+        criteria = _get_tender_criteria()
+        assert "ניקיון" in criteria
+        assert "מוסדות" in criteria or "ציבוריים" in criteria
+
+
 class TestTenderKeywords:
     """בדיקות לטעינת מילות חיפוש מכרזים."""
 
