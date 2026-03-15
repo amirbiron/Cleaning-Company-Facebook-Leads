@@ -193,6 +193,150 @@ def _parse_json_response(raw_text: str):
     return json.loads(text)
 
 
+# ── סיווג מכרזים ──────────────────────────────────────────────
+
+# קריטריוני סיווג מכרזים — ברירת מחדל מובנית (ניתן לדרוס דרך env/DB)
+_TENDER_CRITERIA_DEFAULT_TEXT = """אתה מסווג מכרזים ממשלתיים עבור חברת ניקיון.
+
+מכרז רלוונטי:
+- שירותי ניקיון למוסדות ציבוריים, משרדים, מפעלים, בתי אבות, מתנ"סים, דיור מוגן, בתי ספר, שטחים מסחריים
+- שירותי תחזוקה ואחזקה שכוללים ניקיון כחלק מרכזי
+- שירותי הדברה בשילוב ניקיון
+- מכרזים לאספקת ציוד ניקיון בכמויות מוסדיות
+
+מכרז לא רלוונטי:
+- ניקיון דירות מגורים, בתים פרטיים, בנייני מגורים
+- מכרזים שמזכירים ניקיון רק כחלק שולי (למשל "ניקיון נתונים", "ניקיון תוכנה")
+- מכרזי בנייה/שיפוץ שכוללים ניקיון סופי בלבד
+- מכרזי כוח אדם כלליים שלא מתמחים בניקיון"""
+
+_TENDER_CRITERIA_ENV = os.environ.get("TENDER_CLASSIFICATION_CRITERIA", "").strip()
+
+
+def _get_tender_criteria() -> str:
+    """טוען קריטריוני סיווג מכרזים מ-DB עם fallback ל-env ולברירת מחדל."""
+    try:
+        from database import get_config
+        custom = get_config("tender_classification_criteria")
+        if custom and custom.strip():
+            return custom
+    except Exception:
+        pass
+    return _TENDER_CRITERIA_ENV or _TENDER_CRITERIA_DEFAULT_TEXT
+
+
+def _build_tender_system_prompt() -> str:
+    return _get_tender_criteria() + """
+
+תקבל מספר מכרזים ממוספרים. החזר מערך JSON בלבד, ללא טקסט נוסף.
+כל איבר במערך מתאים למכרז לפי הסדר:
+[{"relevant": true/false, "reason": "משפט קצר בעברית"}, ...]"""
+
+
+def _build_tender_single_prompt() -> str:
+    return _get_tender_criteria() + """
+
+החזר JSON בלבד, ללא טקסט נוסף:
+{"relevant": true/false, "reason": "משפט קצר בעברית"}"""
+
+
+def classify_tender(name: str, publisher: str, category: str) -> dict:
+    """סיווג מכרז בודד — האם רלוונטי לחברת ניקיון."""
+    criteria = _get_tender_criteria()
+    if not criteria:
+        return {"relevant": True, "reason": "אין קריטריוני סיווג — מעביר"}
+    try:
+        raw_text = _chat_completion(
+            system=_build_tender_single_prompt(),
+            user=f"שם המכרז: {name}\nגוף מפרסם: {publisher}\nתחום: {category}",
+            max_tokens=256,
+            call_type="tender_single",
+        )
+        if not raw_text.strip():
+            return {"relevant": True, "reason": "תשובה ריקה — מעביר"}
+        return _parse_json_response(raw_text)
+    except Exception as e:
+        log.warning(f"שגיאה בסיווג מכרז: {e} — מעביר")
+        return {"relevant": True, "reason": f"שגיאה בסיווג: {e}"}
+
+
+def classify_tender_batch(tenders: list[dict], batch_size: int = 10) -> list[dict]:
+    """סיווג מכרזים באצ'ים — האם רלוונטיים לחברת ניקיון.
+
+    Args:
+        tenders: רשימת מילונים עם 'name', 'publisher', 'category'.
+        batch_size: כמה מכרזים בכל בקשה (ברירת מחדל: 10 — מכרזים קצרים יותר מפוסטים).
+
+    Returns:
+        רשימה באותו סדר, כל איבר {'relevant': bool, 'reason': str}.
+    """
+    if not tenders:
+        return []
+    criteria = _get_tender_criteria()
+    if not criteria:
+        return [{"relevant": True, "reason": "אין קריטריוני סיווג — מעביר"} for _ in tenders]
+
+    all_results: list[dict] = []
+
+    for start in range(0, len(tenders), batch_size):
+        batch = tenders[start : start + batch_size]
+        log.info(f"סיווג מכרזים באצ' {start // batch_size + 1}: {len(batch)} מכרזים (מתוך {len(tenders)})")
+
+        parts = []
+        for idx, t in enumerate(batch, 1):
+            parts.append(
+                f"--- מכרז {idx} ---\n"
+                f"שם: {t.get('name', '')}\n"
+                f"גוף מפרסם: {t.get('publisher', '')}\n"
+                f"תחום: {t.get('category', '')}"
+            )
+        user_message = "\n\n".join(parts)
+
+        try:
+            raw_text = _chat_completion(
+                system=_build_tender_system_prompt(),
+                user=user_message,
+                max_tokens=max(512, 200 * len(batch)),
+                call_type="tender_batch",
+            )
+
+            if not raw_text.strip():
+                log.warning("תשובה ריקה בבאצ' מכרזים — fallback לסיווג בודד")
+                for t in batch:
+                    all_results.append(classify_tender(t["name"], t["publisher"], t.get("category", "")))
+                continue
+
+            parsed = _parse_json_response(raw_text)
+            if isinstance(parsed, dict):
+                parsed = [parsed]
+
+            if not isinstance(parsed, list) or len(parsed) != len(batch):
+                log.warning(f"אורך תשובה לא תואם בבאצ' מכרזים — fallback לסיווג בודד")
+                for t in batch:
+                    all_results.append(classify_tender(t["name"], t["publisher"], t.get("category", "")))
+                continue
+
+            batch_results = []
+            for result in parsed:
+                batch_results.append(result)
+            all_results.extend(batch_results)
+
+        except json.JSONDecodeError as e:
+            log.error(f"JSON לא תקין בבאצ' מכרזים: {e} — fallback")
+            for t in batch:
+                all_results.append(classify_tender(t["name"], t["publisher"], t.get("category", "")))
+        except openai.APIError as e:
+            log.error(f"שגיאת API בבאצ' מכרזים: {e} — fallback")
+            for t in batch:
+                all_results.append(classify_tender(t["name"], t["publisher"], t.get("category", "")))
+        except Exception as e:
+            log.error(f"שגיאה בסיווג באצ' מכרזים: {e} — fallback", exc_info=True)
+            for t in batch:
+                all_results.append(classify_tender(t["name"], t["publisher"], t.get("category", "")))
+
+    return all_results
+
+
 def classify_batch(posts: list[dict], batch_size: int = 5) -> list[dict]:
     """סיווג מספר פוסטים בבקשה אחת ל-API.
 

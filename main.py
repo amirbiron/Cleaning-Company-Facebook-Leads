@@ -1977,6 +1977,65 @@ async def _run_debug_scan(group_url: str) -> str:
     return "\n".join(lines)
 
 
+async def _run_tender_scan() -> int:
+    """סורק מכרזים ממשלתיים, מסנן עם AI, ושולח חדשים לטלגרם. מחזיר מספר מכרזים שנשלחו."""
+    from scraper_tenders import TENDER_ENABLED, fetch_tenders, load_tender_keywords
+    from classifier import classify_tender_batch
+    from database import is_tender_seen, mark_tender_sent
+    from notifier import send_tender
+
+    # בדיקת הפעלה — דרך env var או דרך DB
+    enabled = TENDER_ENABLED
+    if not enabled:
+        db_val = get_config("tender_enabled", "0")
+        enabled = str(db_val).strip().lower() in ("1", "true", "yes", "on")
+    if not enabled:
+        return 0
+
+    log.info("מתחיל סריקת מכרזים ממשלתיים...")
+    keywords = load_tender_keywords()
+    tenders = await asyncio.to_thread(fetch_tenders, keywords)
+
+    # סינון מכרזים שכבר נשלחו
+    new_tenders = [t for t in tenders if not is_tender_seen(t["id"])]
+    log.info(f"מכרזים חדשים לסיווג: {len(new_tenders)} (מתוך {len(tenders)} פעילים)")
+
+    if not new_tenders:
+        return 0
+
+    # סיווג AI — מסנן מכרזים לא רלוונטיים (מכרז שמזכיר "ניקיון" אבל לא באמת שירותי ניקיון)
+    results = await asyncio.to_thread(classify_tender_batch, new_tenders)
+
+    sent = 0
+    skipped = 0
+    for tender, result in zip(new_tenders, results):
+        if not result.get("relevant"):
+            skipped += 1
+            log.debug(f"מכרז לא רלוונטי: {tender['name'][:50]} — {result.get('reason', '')}")
+            # מסמנים כנראה כדי לא לסווג שוב
+            mark_tender_sent(tender["id"], tender["name"], tender["publisher"])
+            continue
+        reason = result.get("reason", "")
+        ok = await asyncio.to_thread(
+            send_tender,
+            name=tender["name"],
+            publisher=tender["publisher"],
+            deadline=tender["deadline"],
+            url=tender["url"],
+            category=tender.get("category", ""),
+            source=tender.get("source", "mr.gov.il"),
+        )
+        if ok:
+            mark_tender_sent(tender["id"], tender["name"], tender["publisher"])
+            sent += 1
+            log.info(f"מכרז נשלח: {tender['name'][:60]} — {reason}")
+        else:
+            log.warning(f"שליחת מכרז נכשלה: {tender['name'][:60]}")
+
+    log.info(f"סריקת מכרזים הסתיימה — {sent} נשלחו, {skipped} סוננו ע\"י AI")
+    return sent
+
+
 async def run_cycle():
     import gc
     # Lazy imports to keep startup light and allow running parts of the codebase
@@ -2310,14 +2369,27 @@ async def run_cycle():
         _finish_scan_progress(leads_found, error=str(e))
         raise
 
+    # ── שלב 5 — סריקת מכרזים ממשלתיים (data.gov.il) ──
+    tenders_sent = 0
+    try:
+        tenders_sent = await _run_tender_scan()
+    except Exception as e:
+        log.warning(f"סריקת מכרזים נכשלה (ממשיכים): {e}")
+
     stats = get_stats()
-    log.info(f"סבב הסתיים | לידים בסבב: {leads_found} | סך נראו: {stats['seen']} | סך נשלחו: {stats['sent']}")
+    log.info(f"סבב הסתיים | לידים בסבב: {leads_found} | מכרזים: {tenders_sent} | סך נראו: {stats['seen']} | סך נשלחו: {stats['sent']}")
 
     # הודעת סיכום סריקה — נשלחת לטלגרם רק כשנמצאו לידים חדשים,
     # כדי לעזור למשתמש להבחין בין הודעות מסריקות שונות.
-    if leads_found > 0:
+    if leads_found > 0 or tenders_sent > 0:
         scan_time = _now_local().strftime("%H:%M")
-        summary = f"עד כאן לסריקה של שעה {scan_time}, נתראה בסריקה הבאה 💫"
+        parts = []
+        if leads_found > 0:
+            parts.append(f"{leads_found} לידים")
+        if tenders_sent > 0:
+            parts.append(f"{tenders_sent} מכרזים")
+        found_text = " + ".join(parts)
+        summary = f"סריקה של {scan_time} הסתיימה — {found_text} \U0001f4ab"
         try:
             await asyncio.to_thread(send_message, summary, disable_web_page_preview=True)
         except Exception:
